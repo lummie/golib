@@ -1,5 +1,7 @@
 package goUtils
 
+// Various utility functions related to the file system
+
 import (
 	"os"
 )
