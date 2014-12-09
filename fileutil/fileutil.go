@@ -1,4 +1,4 @@
-package goUtils
+package fileutil
 
 // Various utility functions related to the file system
 

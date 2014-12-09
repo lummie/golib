@@ -1,4 +1,4 @@
-package goUtils
+package fileutil
 
 import (
 	"io/ioutil"
