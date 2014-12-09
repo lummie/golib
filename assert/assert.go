@@ -9,14 +9,14 @@ import (
 )
 
 // Checks that expected and actual are equal, and if not causes a standard testing Error on *t
-func Equal(t *testing.T, expected, actual interface{}, messages ...interface{}) {
+func Equal(t *testing.T, actual, expected interface{}, messages ...interface{}) {
 	if !areEqual(expected, actual) {
 		t.Errorf("Equal -  expected[%v](%v) actual[%v](%v) <<%v", expected, reflect.TypeOf(expected), actual, reflect.TypeOf(actual), messages)
 	}
 }
 
 // Checks that expected and actual are NOT equal, and if not causes a standard testing Error on *t
-func NotEqual(t *testing.T, expected, actual interface{}, messages ...interface{}) {
+func NotEqual(t *testing.T, actual, expected interface{}, messages ...interface{}) {
 	if areEqual(expected, actual) {
 		t.Errorf("NotEqual -  expected[%v](%v) actual[%v](%v) <<%s", expected, reflect.TypeOf(expected), actual, reflect.TypeOf(actual), messages)
 	}
