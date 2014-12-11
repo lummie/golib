@@ -24,14 +24,14 @@ func NotEqual(t *testing.T, actual, expected interface{}, messages ...interface{
 
 // Checks that actual is nil, and if not causes a standard testing Error on *t
 func Nil(t *testing.T, actual interface{}, messages ...interface{}) {
-	if !areEqual(nil, actual) {
-		t.Errorf("Expected nil, actual[%v] :%s", actual, messages)
+	if !(actual == nil || reflect.ValueOf(actual).IsNil()) {
+		t.Errorf("Expected nil, actual[%v](%v) :%s", actual, reflect.TypeOf(actual), messages)
 	}
 }
 
 // Checks that actual is not nil, and if not causes a standard testing Error on *t
 func NotNil(t *testing.T, actual interface{}, messages ...interface{}) {
-	if areEqual(nil, actual) {
+	if actual == nil || reflect.ValueOf(actual).IsNil() {
 		t.Errorf("Expected not nil, actual[%v] :%s", actual, messages)
 	}
 }
