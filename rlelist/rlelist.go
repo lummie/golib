@@ -31,6 +31,7 @@ func New() *RleList {
 	}
 }
 
+// appends a row to the list
 func (r *RleList) Append(value interface{}) uint {
 	// check if the list is empty and if so add the new block
 	lastBlockListItem := r.list.Back()
@@ -94,6 +95,8 @@ func (r *RleList) Iterate(f IteratorFn) {
 
 // writes the rleList to a writer
 func (r *RleList) Write(writer io.Writer) error {
+	r.Lock()
+	defer r.Unlock()
 	enc := gob.NewEncoder(writer)
 
 	err := enc.Encode("RLELIST")
@@ -126,6 +129,8 @@ func (r *RleList) Write(writer io.Writer) error {
 // reads the RleList from a Reader, overwriting the current contents
 // if an error occurs the RleList will be initialised to empty
 func (r *RleList) Read(reader io.Reader) error {
+	r.Lock()
+	defer r.Unlock()
 	dec := gob.NewDecoder(reader)
 
 	resetToEmpty := func() {

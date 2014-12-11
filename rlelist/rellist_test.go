@@ -1,10 +1,12 @@
 package rlelist
 
 import (
+	"bufio"
 	"bytes"
 	"github.com/lummie/golib/assert"
-	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"testing"
 )
 
@@ -128,6 +130,86 @@ func TestIteratorReadWriteWithItemsInManyBlocks(t *testing.T) {
 
 }
 
+const fileReadWriteTestCount int = 1000000
+
+func TestIteratorWriteToFile(t *testing.T) {
+	// create the list and populate
+	list := New()
+
+	// add the items to the list
+	for i := 0; i < fileReadWriteTestCount; i++ {
+		list.Append("Item " + strconv.Itoa(i/10))
+	}
+
+	filename := "/tmp/RleList.dat"
+	fo, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	// close fo on exit and check for its returned error
+	defer func() {
+		if err := fo.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	w := bufio.NewWriter(fo)
+	list.Write(w)
+	w.Flush()
+}
+
+func TestIteratorReadFromFile(t *testing.T) {
+	// create the list and populate
+	list := New()
+
+	filename := "/tmp/RleList.dat"
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	// close f on exit and check for its returned error
+	defer func() {
+		if err := f.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	w := bufio.NewReader(f)
+	list.Read(w)
+	var count uint = 0
+	list.Iterate(func(index uint, value interface{}) {
+		count++
+	})
+	assert.Equal(t, fileReadWriteTestCount, count, "Expected number of records:", fileReadWriteTestCount)
+}
+
+func TestIteratorReadFromEmptyFile(t *testing.T) {
+	filename := "/tmp/RleListInvalid.dat"
+	fo, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	fo.WriteString("Invalid Data")
+	fo.Close()
+
+	f, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	// close f on exit and check for its returned error
+	defer func() {
+		if err := f.Close(); err != nil {
+			panic(err)
+		}
+	}()
+	w := bufio.NewReader(f)
+
+	list := New()
+	err = list.Read(w)
+
+	assert.NotNil(t, err, "Expected an error reading empty file")
+	assert.Equal(t, 0, list.blockCount, "Expect no blocks")
+	assert.Equal(t, 0, list.rowCount, "Expect no rows")
+}
+
 func BenchmarkAppendMod1(b *testing.B) {
 	list := New()
 
@@ -205,13 +287,11 @@ func BenchmarkAppendRandomRange16(b *testing.B) {
 }
 
 func BenchmarkWriteReadSpeedToBuffer(b *testing.B) {
-	log.Println(b.N)
 	list := New()
 	for i := 0; i < b.N; i++ {
 		list.Append(int(i / 1000))
 	}
 
-	log.Println("Reset")
 	b.ResetTimer()
 
 	buf := new(bytes.Buffer)
